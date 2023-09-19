@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block header-content %}
+  
+{% endblock header-content %}
+
+
+{% block site-icerik %}
+
+    {% if not request.user.is_premiumUser %}
+        {% include "./Components/Modals/subscriptionRequired.html" %}
+    {% endif %}
+    <!-- hero wallpaper -->
+    <div class="hero-image">
+
+        <div class="hero-text">
+          <video width="100%" id="netflix_video" src="{{randomBanner.movie_source.url}}" muted></video>
+    
+
+
+        <div class="video-option">
+
+
+                <i id="playButton" class="fa-solid fa-lg fa-rotate-right"></i>
+                <i id="audio" class="fa-solid fa-lg fa-volume-xmark"></i>
+       
+            
+        </div>
+
+    </div>
+
+
+    </div>
+
+
+    <div class="row">
+
+
+      {% for category, movies in dynamic %}
+
+     
+        
+      <h3 class="text-light ms-5">{{category}}</h3>
+
+        
+    
+<!-- filmleri döngüye sok -->
+{% for movie in movies %}
+<div class="col-3 ms-5 mb-5">
+
+          <!-- Modal -->
+{% if request.user.is_premiumUser %}
+<div class="modal fade" id="exampleModal-{{movie.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="exampleModalLabel">{{movie.movie_name}}</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        
+        <video id="track-{{movie.id}}" width="100%" src="{{movie.movie_source.url}}" muted></video>
+      </div>
+
+      <div class="row mt-5 similar-movies-container">
+
+
+        {% if movie.similar_movies|length %}
+        <h3 class="mb-3">Benzer Türler</h3>
+        {% endif %}
+    
+
+        {% for key, smilar in movie.similar_movies %}
+        
+   
+  
+       
+
+        <div class="col-md-4 mb-3">
+
+          <div class="banner">
+
+            <img src="{{smilar.movie_banner.url}}" alt="{{smilar.movie_name}}" class="responsive-banner">
+          </div>
+
+          <div class="card-options">
+
+            <div class="d-flex mt-3 justify-content-end">
+              <i onclick="handleAddList('{{smilar.id}}')" class="fa-solid fa-plus" style="color: #ffffff;"></i>
+            </div>
+          </div>
+        </div>
+
+        {% endfor %}
+
+      </div>
+
+      <div class="modal-footer d-block">
+      
+        <h3>{{movie.movie_name}} Hakkında</h3>
+        <p><b>Açıklama:</b> {{movie.movie_description}}</p>
+        <p><b>Kategoriler:</b> {{movie.handleCategories}} </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<div class="card">
+                <img src="{{movie.movie_banner.url}}" class="card-img-top" alt="buz">
+                <div class="card-body">
+                    <div class="card-options">
+
+                        {% if request.user.is_premiumUser %}
+                        <i class="fa-solid fa-play"></i>
+                        <i onclick="handleAddList('{{movie.id}}')" class="fa-solid fa-plus" style="color: #ffffff;"></i>
+                        <i onclick="handleLike('{{movie.id}}')" class="fa-solid fa-thumbs-up"></i>
+                        <i onclick="handleModal('{{movie.id}}')" data-bs-toggle="modal" data-bs-target="#exampleModal-{{movie.id}}" class="fa-solid fa-chevron-down"></i>
+                        
+                        {% else %}
+                        
+                        <i class="fa-solid fa-play" data-bs-toggle="modal" data-bs-target="#subModal"></i>
+                        <i class="fa-solid fa-plus" data-bs-toggle="modal" data-bs-target="#subModal" style="color: #ffffff;"></i>
+                        <i class="fa-solid fa-thumbs-up" data-bs-toggle="modal" data-bs-target="#subModal"></i>
+                        <i data-bs-toggle="modal" data-bs-target="#subModal" class="fa-solid fa-chevron-down"></i>
+                        
+                        
+                        {% endif %}
+                        
+         
+                    </div>
+
+                    <div class="card-genres">
+                    
+                        <ul>
+
+                            {% for category in movie.movie_category.all %}
+                            <li>{{category}}</li>
+                            {% endfor %}
+                        
+                  
+                        </ul>
+                    </div>
+
+                  <p class="card-text">{{movie.movie_description}}</p>
+                </div>
+</div>
+
+        
+
+        </div>
+        {% endfor %}
+        {% endfor %}
+
+
+       
+        </div>
+
+
+    <script src="{% static 'scripts/cardHover.js' %}"></script>
+    <script src="{% static 'scripts/handleModal.js' %}"></script>
+
+    <script>
+            const video = document.getElementById("netflix_video");
+            const playButton = document.getElementById('playButton');
+            const audioBtn = document.getElementById('audio')
+
+            function playVideo() {
+
+                video.play();
+
+            }
+
+            document.body.onload = playVideo
+
+            video.addEventListener('ended', function () {
+                // Video bittiğinde butonu gösteriyoruz
+                playButton.style.display = 'revert';
+            });
+            
+            audioBtn.addEventListener('click', function() {
+
+                video.muted = !video.muted;
+
+               
+                if (video.muted == false) {
+                    audioBtn.className = 'fa-solid fa-lg fa-volume-off'
+
+                } else {
+          
+                    audioBtn.className = "fa-solid fa-lg fa-volume-xmark"
+                }
+              
+                video.volume = 0.5
+      
+               
+            })
+
+            playButton.addEventListener('click', function () {
+            video.currentTime = 0;
+            video.play();
+            playButton.style.display = 'none'; // Butonu tekrar gizliyoruz
+
+            });
+
+        
+    </script>
+
+
+    <script src="{% static 'scripts/likeMovie.js' %}"></script>
+    <script src="{% static 'scripts/addMyList.js' %}"></script>
+
+{% endblock site-icerik %}
+
